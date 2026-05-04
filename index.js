@@ -12,14 +12,14 @@ const reportError = (dataResults)=>{
 }
 async function init(){
   try{
-    let sql = `CREATE TABLE IF NOT EXISTS weather_cities (id TEXT PRIMARY KEY, name TEXT NOT NULL, country TEXT, admin1 TEXT, admin2 TEXT, lat TEXT NOT NULL, lon TEXT NOT NULL, pop TEXT)`
+    let sql = `CREATE TABLE IF NOT EXISTS cities (id TEXT PRIMARY KEY, name TEXT NOT NULL, country TEXT, admin1 TEXT, admin2 TEXT, lat TEXT, lon TEXT, pop TEXT)`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
       reportError(dataResults)
       setTimeout(init, 5000)
       return
     }
-    log.info(`created rqlite table weather_cities`)
+    log.info(`created rqlite table cities`)
     CACHE_READY = true
   }catch(e){
     log.error(e)
@@ -30,10 +30,10 @@ init()
 async function all(){
   try{
     if(!CACHE_READY) return
-    let sql = `SELECT name, value FROM weather_cities`
-    let res = await dataApiClient.query(sql)
-    if(res.hasError()){
-      reportError(res)
+    let sql = `SELECT * FROM cities`
+    let dataResults = await dataApiClient.query(sql)
+    if(dataResults.hasError()){
+      reportError(dataResults)
       return
     }
     return dataResults?.toArray()
@@ -41,11 +41,26 @@ async function all(){
     log.error(e)
   }
 }
-async function set(data = { id, name, lat, lon, pop }){
+async function getIds(){
   try{
-    if(!id || !name || !lat || !lon || !CACHE_READY) return
+    if(!CACHE_READY) return
+    let sql = `SELECT id FROM cities`
+    let dataResults = await dataApiClient.query(sql)
+    if(dataResults.hasError()){
+      reportError(dataResults)
+      return
+    }
+    let data = dataResults?.toArray()
+    return data?.map(x=>x.id)
+  }catch(e){
+    log.error(e)
+  }
+}
+async function set(data){
+  try{
+    if(!data || !CACHE_READY) return
     let sql = [
-      [`INSERT OR REPLACE INTO weather_cities(id, name, country, admin1, admin2, lat, lon, pop) VALUES(:id, :name, :country, :admin1, :admin2, :lat, :lon, :pop)`, data]
+      [`INSERT OR REPLACE INTO cities(id, name, country, admin1, admin2, lat, lon, pop) VALUES(:id, :name, :country, :admin1, :admin2, :lat, :lon, :pop)`, data]
     ]
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
@@ -60,7 +75,7 @@ async function set(data = { id, name, lat, lon, pop }){
 async function get(id){
   try{
     if(!id || !CACHE_READY) return
-    let sql = `SELECT * FROM weather_cities WHERE id=${id.toString()}`
+    let sql = `SELECT * FROM cities WHERE id=${id.toString()}`
     let res = await dataApiClient.query(sql)
     if(res.hasError()){
       reportError(res)
@@ -74,7 +89,7 @@ async function get(id){
 async function del(id){
   try{
     if(!id || !CACHE_READY) return
-    let sql = `DELETE FROM weather_cities WHERE id=${id.toString()}`
+    let sql = `DELETE FROM cities WHERE id=${id.toString()}`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
       reportError(dataResults)
@@ -86,5 +101,5 @@ async function del(id){
   }
 }
 module.exports = {
-  del, get, set, status: ()=>{ return CACHE_READY }
+  all, del, get, getIds, set, status: ()=>{ return CACHE_READY }
 }
