@@ -1,5 +1,5 @@
 {
-  "name": "weather-city-cache",
+  "name": "city-cache",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/smirk-bot/weather-city-cache.git"
+    "url": "git+https://github.com/smirk-bot/city-cache.git"
   },
   "author": "",
   "license": "ISC",
