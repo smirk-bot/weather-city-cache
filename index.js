@@ -12,7 +12,7 @@ const reportError = (dataResults)=>{
 }
 async function init(){
   try{
-    let sql = `CREATE TABLE IF NOT EXISTS weather_cities (id TEXT PRIMARY KEY, name TEXT NOT NULL, value TEXT NOT NULL, lat TEXT NOT NULL, lon TEXT NOT NULL, pop TEXT)`
+    let sql = `CREATE TABLE IF NOT EXISTS weather_cities (id TEXT PRIMARY KEY, name TEXT NOT NULL, country TEXT, admin1 TEXT, admin2 TEXT, lat TEXT NOT NULL, lon TEXT NOT NULL, pop TEXT)`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
       reportError(dataResults)
@@ -45,7 +45,7 @@ async function set(data = { id, name, lat, lon, pop }){
   try{
     if(!id || !name || !lat || !lon || !CACHE_READY) return
     let sql = [
-      [`INSERT OR REPLACE INTO weather_cities(id, name, value, lat, lon, pop) VALUES(:id, :name, :id, :lat, :lon, :pop)`, data]
+      [`INSERT OR REPLACE INTO weather_cities(id, name, country, admin1, admin2, lat, lon, pop) VALUES(:id, :name, :country, :admin1, :admin2, :lat, :lon, :pop)`, data]
     ]
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
